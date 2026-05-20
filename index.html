@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专属温柔星球</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif;}
+        body{
+            background:#000;
+            color:#e6c88a;
+            overflow-x:hidden;
+        }
+        #starCanvas{
+            position:fixed;
+            top:0;left:0;
+            width:100vw;height:100vh;
+            z-index:-1;
+        }
+        .page1{
+            width:100vw;height:100vh;
+            display:flex;flex-direction:column;
+            justify-content:center;align-items:center;
+        }
+        .title-text{
+            font-size:36px;
+            color:#f0c878;
+            text-shadow:0 0 15px #ffd700;
+            margin-bottom:50px;
+            letter-spacing:3px;
+        }
+        .tip-text{
+            font-size:20px;
+            color:#87a8e8;
+            margin:20px 0;
+            min-height:30px;
+        }
+        .btn-box{
+            display:flex;gap:30px;margin-top:20px;
+        }
+        .choose-btn{
+            padding:12px 35px;
+            background:linear-gradient(135deg,#101a33,#203359);
+            border:1px solid #f0c878;
+            color:#f0c878;
+            border-radius:50px;
+            font-size:18px;
+            cursor:pointer;
+            transition:all 0.3s ease;
+        }
+        .choose-btn:hover{
+            background:#f0c878;color:#000;
+            box-shadow:0 0 20px #ffd700;
+        }
+        .page2{
+            width:100vw;min-height:100vh;
+            display:none;
+            flex-direction:column;
+            justify-content:center;align-items:center;
+            padding:50px 0;
+        }
+        .record-player{
+            width:320px;height:320px;
+            background:radial-gradient(#111b38,#000);
+            border-radius:50%;
+            border:3px solid #f0c878;
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 0 30px #f0c87855;
+            margin-bottom:40px;
+            animation:slowRotate 15s linear infinite;
+        }
+        @keyframes slowRotate{
+            from{transform:rotate(0deg);}
+            to{transform:rotate(360deg);}
+        }
+        .play-text{
+            font-size:22px;color:#87a8e8;
+            cursor:pointer;
+            padding:15px 40px;
+            border:1px solid #87a8e8;
+            border-radius:50px;
+            transition:0.3s;
+        }
+        .play-text:hover{background:#87a8e822;}
+        audio{display:none;}
+        .loading-text{
+            display:none;
+            color:#f0c878;
+            margin-top:20px;
+        }
+        .firework-page{
+            width:100vw;min-height:100vh;
+            display:none;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            position:relative;
+        }
+        .fire-tip{
+            font-size:26px;color:#f0c878;margin-bottom:30px;
+        }
+        #fireCanvas{
+            position:absolute;top:0;left:0;
+            width:100%;height:100%;z-index:-1;
+        }
+        .more-btn{
+            margin-top:60px;padding:12px 30px;
+            background:#101a33;border:1px solid #f0c878;
+            color:#f0c878;border-radius:8px;
+            cursor:pointer;font-size:17px;
+        }
+        .show-word{
+            font-size:24px;color:#87a8e8;margin:30px 0;
+            display:none;
+        }
+        .photo-box{
+            display:none;flex-direction:column;align-items:center;
+        }
+        .my-img{
+            width:280px;border-radius:15px;
+            border:2px solid #f0c878;
+            box-shadow:0 0 25px #f0c87844;
+        }
+        .love-word{
+            margin-top:15px;font-size:18px;color:#ff7799;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starCanvas"></canvas>
+
+    <div class="page1" id="page1">
+        <div class="title-text">猜猜我是谁？</div>
+        <div class="tip-text" id="msgTip"></div>
+        <div class="btn-box">
+            <button class="choose-btn" onclick="chooseA()">A：扣脚大汉</button>
+            <button class="choose-btn" onclick="chooseB()">B：全世界最可爱的莎莎</button>
+        </div>
+    </div>
+
+    <div class="page2" id="page2">
+        <div class="record-player"></div>
+        <div class="play-text" onclick="playMusic()">点一下陪我听歌嘛~</div>
+        <div class="loading-text" id="loadingText">正在加载歌曲，请稍等...</div>
+        <audio id="music" preload="auto" controls loop>
+            <source src="love-song.mp3" type="audio/mpeg">
+        
+    </div>
+
+    <div class="firework-page" id="firePage">
+        <canvas id="fireCanvas"></canvas>
+        <div class="fire-tip">啦啦啦~请你看烟花！</div>
+        <button class="more-btn" id="lookBtn" onclick="showMore()">什么？没看够？</button>
+        <div class="show-word" id="showWord">那就多看看我叭~</div>
+        <div class="photo-box" id="photoBox">
+            <img src="myphoto.jpg" class="my-img">
+            <div class="love-word">爱你！</div>
+        </div>
+    </div>
+
+<script>
+const starCan = document.getElementById('starCanvas');
+const starCtx = starCan.getContext('2d');
+starCan.width = window.innerWidth;
+starCan.height = window.innerHeight;
+let stars = [];
+for(let i=0;i<180;i++){
+    stars.push({
+        x:Math.random()*starCan.width,
+        y:Math.random()*starCan.height,
+        r:Math.random()*2+0.5,
+        speed:Math.random()*0.5
+    })
+}
+function drawStar(){
+    starCtx.clearRect(0,0,starCan.width,starCan.height);
+    starCtx.fillStyle="#fff";
+    stars.forEach(s=>{
+        starCtx.beginPath();
+        starCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        starCtx.fill();
+        s.y+=s.speed;
+        if(s.y>starCan.height)s.y=0;
+    })
+    requestAnimationFrame(drawStar);
+}
+drawStar();
+
+let aClickNum = 0;
+const msgTip = document.getElementById('msgTip');
+const page1 = document.getElementById('page1');
+const page2 = document.getElementById('page2');
+const firePage = document.getElementById('firePage');
+
+function chooseA(){
+    aClickNum++;
+    if(aClickNum===1){
+        msgTip.innerText = "揍你！重新选！";
+    }else{
+        msgTip.innerText = "咋这样！那好吧，我其实就是抠脚大汉";
+        setTimeout(()=>{toSecondPage()},1200);
+    }
+}
+function chooseB(){
+    if(aClickNum===0){
+        msgTip.innerText = "恭喜你答对啦！";
+    }else{
+        msgTip.innerText = "哼哼！没错！";
+    }
+    setTimeout(()=>{toSecondPage()},1000);
+}
+function toSecondPage(){
+    page1.style.display = "none";
+    page2.style.display = "flex";
+}
+
+function playMusic(){
+    const music = document.getElementById('music');
+    const loadingText = document.getElementById('loadingText');
+    loadingText.style.display = "block";
+    
+    music.addEventListener('canplaythrough', function onReady() {
+        music.play();
+        loadingText.style.display = "none";
+        music.removeEventListener('canplaythrough', onReady);
+        setTimeout(()=>{
+            page2.style.display = "none";
+            firePage.style.display = "flex";
+            startFireWork();
+        },800);
+    });
+
+    music.load();
+}
+
+const fireCan = document.getElementById('fireCanvas');
+const fireCtx = fireCan.getContext('2d');
+fireCan.width = window.innerWidth;
+fireCan.height = window.innerHeight;
+let fireArr = [];
+function startFireWork(){
+    setInterval(()=>{
+        let x = Math.random()*fireCan.width;
+        let y = Math.random()*fireCan.height/2;
+        for(let i=0;i<60;i++){
+            fireArr.push({
+                x:x,y:y,
+                sx:(Math.random()-0.5)*8,
+                sy:(Math.random()-0.5)*8,
+                color:["#f0c878","#ff5577","#87a8e8","#ffffff"][Math.floor(Math.random()*4)],
+                size:Math.random()+1
+            })
+        }
+    },1200)
+    function drawFire(){
+        fireCtx.clearRect(0,0,fireCan.width,fireCan.height);
+        fireArr.forEach((item,index)=>{
+            item.x+=item.sx;
+            item.y+=item.sy;
+            item.sy+=0.1;
+            fireCtx.fillStyle = item.color;
+            fireCtx.beginPath();
+            fireCtx.arc(item.x,item.y,item.size,0,Math.PI*2);
+            fireCtx.fill();
+            if(item.y>fireCan.height) fireArr.splice(index,1);
+        })
+        requestAnimationFrame(drawFire);
+    }
+    drawFire();
+}
+
+function showMore(){
+    document.getElementById('showWord').style.display = "block";
+    document.getElementById('photoBox').style.display = "flex";
+    document.getElementById('lookBtn').style.display = "none";
+}
+</script>
+</body>
+</html>
